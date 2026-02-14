@@ -1,0 +1,80 @@
+import React from 'react'
+import Image from 'next/image'
+import { product } from 'src/types/products.type'
+import ProductCard from 'src/app/_Components/ProductCard/ProductCard'
+import { Badge } from "@/components/ui/badge"
+
+async function getData(id: string) {
+  const [catRes, prodRes] = await Promise.all([
+    fetch(`https://ecommerce.routemisr.com/api/v1/categories/${id}`),
+    fetch(`https://ecommerce.routemisr.com/api/v1/products?category[in]=${id}`)
+  ])
+  const catData = await catRes.json()
+  const prodData = await prodRes.json()
+  return { category: catData.data, products: prodData.data }
+}
+
+export default async function CategoryDetails({ params }: { params: { id: string } }) {
+  const { category, products } = await getData(params.id)
+
+  return (
+    <div className="container mx-auto px-4 py-12 space-y-16">
+      
+      {/* 1. Modern Header Section */}
+      <section className="bg-white dark:bg-gray-900 rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row items-center gap-12">
+        
+        {/* Image Box */}
+        <div className="w-full md:w-1/3">
+          <div className="relative aspect-square bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden p-6 shadow-inner">
+            <Image 
+              src={category.image} 
+              alt={category.name} 
+              fill 
+              className="object-contain" // عشان الصورة تبان كاملة
+              priority
+            />
+          </div>
+        </div>
+
+        {/* Content Box */}
+        <div className="w-full md:w-2/3 space-y-4 text-center md:text-left">
+          <Badge className="bg-main/10 text-main hover:bg-main/20 border-none px-4 py-1 text-sm uppercase tracking-widest">
+            Category
+          </Badge>
+          <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight">
+            {category.name}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl leading-relaxed">
+            Explore our exclusive collection of {category.name}. We provide high-quality products from top brands just for you.
+          </p>
+          <div className="pt-4">
+            <Badge variant="outline" className="text-gray-400 border-gray-200 dark:border-gray-700 px-4 py-2 text-md">
+              {products.length} Products Available
+            </Badge>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Products Section */}
+      <section className="space-y-8">
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold dark:text-white">Products</h2>
+          <div className="h-[2px] flex-1 bg-gray-100 dark:bg-gray-800"></div>
+        </div>
+
+        {products.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((item: product) => (
+              <ProductCard key={item._id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <p className="text-gray-400 text-xl font-medium">No products found in this category.</p>
+          </div>
+        )}
+      </section>
+
+    </div>
+  )
+}
