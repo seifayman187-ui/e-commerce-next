@@ -1,8 +1,9 @@
 export interface Cartdata {
-    status:         string;
-    numOfCartItems: number;
-    cartId:         string;
-    data:           cart;
+    status: string;
+    message?: string; 
+    numOfCartItems?: number; 
+    cartId?: string;        
+    data?: cart;           
 }
 
 export interface cart {

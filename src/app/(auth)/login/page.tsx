@@ -49,22 +49,28 @@ async  function onSubmit(values:LoginPayload){
     password: values.password,
     redirect: false
   })
-  // console.log(data);
-  if(data?.ok){
-    setBtnloader(true)
-    toast.success("Login success !",{position:"top-center"})
-     const token:unknown = await getUserToken()
-        if(token){
-        const data:Cartdata = await getCartData()
-        const sum = data.data.products.reduce((total, item) => total + item.count, 0);
-        setCount(sum)
-        router.push("/")
-      }
-  }else{
-    toast.error(data?.error , {position:"top-center"})
-    setBtnloader(true)
-  }
   
+ if (data?.ok) {
+  setBtnloader(true);
+  toast.success("Login success!", { position: "top-center" });
+
+  try {
+    const token = await getUserToken();
+    if (token) {
+      const cartRes: Cartdata = await getCartData();
+      const sum = cartRes?.data?.products?.reduce((total, item) => total + (item.count || 0), 0) || 0;
+      setCount(sum);
+    }
+  } catch (err) {
+    console.error("Cart fetch error after login", err);
+    setCount(0); 
+  }
+  router.push("/"); 
+  
+} else {
+  toast.error(data?.error, { position: "top-center" });
+  setBtnloader(true);
+}
 
   
   }

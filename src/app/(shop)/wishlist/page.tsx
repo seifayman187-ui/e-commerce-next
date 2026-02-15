@@ -18,9 +18,9 @@ export default function Wishlist() {
  async function getWishlistData(){
     setwishloading(true)
     const data:Wishlistdata = await getWishData()
-    setwishlist(data.data)
+    setwishlist(data?.data)
     setwishloading(false)
-    const sum = data.count;
+    const sum = data?.count;
     setWishCount(sum);
     
   }

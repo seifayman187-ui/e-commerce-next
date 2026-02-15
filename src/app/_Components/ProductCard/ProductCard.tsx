@@ -19,13 +19,15 @@ export default function ProductCard({item}:{item:product}) {
   return (
     <Card className="p-0 overflow-hidden relative border bg-white dark:bg-gray-900 hover:shadow-xl transition-all duration-300 group">
       
-      <div className="absolute top-3 right-3 z-10">
-        <AddToWishlist id={_id}/>
-      </div>
+    <div className="absolute top-3 right-3 z-20 group/wish">
+  <div className="bg-white/90 dark:bg-gray-800/90 p-2 rounded-full shadow-md backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:shadow-lg border border-gray-100 dark:border-gray-700">
+    <AddToWishlist id={_id}/>
+  </div>
+</div>
 
       <Link href={"/products/"+_id}>
         <CardHeader className="p-0">
-          {/* حاوية الصورة لضمان ثبات المقاس */}
+      
           <div className="relative w-full aspect-[4/5] overflow-hidden"> 
             <Image
               src={imageCover}

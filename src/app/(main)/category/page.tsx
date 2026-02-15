@@ -12,7 +12,9 @@ import Link from "next/link";
 export default async function Category() {
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://ecommerce.routemisr.com";
   
-  const res = await fetch(`${BASE_URL}/api/v1/categories`)
+  const res = await fetch(`${BASE_URL}/api/v1/categories`, {
+    next: { revalidate: 86400 }
+  })
   const responseData: Branddata = await res.json()
   const CategoryList: data[] = responseData.data
 

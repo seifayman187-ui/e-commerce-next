@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 export default function ForgetPassword() {
   // ...
   const ForgetPasswordSchema = z.object({
-    email: z.email({ message: "Invalid email address" }),
+    email: z.string().email({ message: "Invalid email address" }),
   });
 
   const form = useForm<LoginPayload>({
@@ -32,7 +32,6 @@ export default function ForgetPassword() {
   const router = useRouter();
 
   async function onSubmit(values: LoginPayload) {
-    // console.log(values)
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/auth/forgotPasswords`,
       {
@@ -44,7 +43,7 @@ export default function ForgetPassword() {
       },
     );
 
-    const data = await (await res).json();
+    const data = await res.json();
     console.log(data);
     if (data.statusMsg == "success") {
       toast.success("Code sent to your email !", { position: "top-center" });

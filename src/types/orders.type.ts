@@ -2,7 +2,7 @@ import { JSX, ReactNode } from "react";
 
 export interface Ordersdata {
     map(arg0: (gamal: Ordersdata) => JSX.Element): import("react").ReactNode;
-    // map(arg0: (item: any) => JSX.Element): import("react").ReactNode;
+    
     taxPrice:          number;
     shippingPrice:     number;
     totalOrderPrice:   number;

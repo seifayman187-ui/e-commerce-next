@@ -10,11 +10,13 @@ import { getUserToken } from "src/getToken";
 import { getCartData } from "./CartAction/CartAction";
 import { Cartdata } from "./types/cart.type";
 
-export const CountContext = createContext<CountContextType>(null!);
 type CountContextType = {
   count: number;
   setCount: Dispatch<SetStateAction<number>>;
+  loadingCount: boolean; 
 };
+
+export const CountContext = createContext<CountContextType>(null!);
 
 export default function CountProvider({
   children,
@@ -22,20 +24,29 @@ export default function CountProvider({
   children: React.ReactNode;
 }) {
   const [count, setCount] = useState(0);
+  const [loadingCount, setLoadingCount] = useState(true);
 
   async function getCart() {
-    const token: unknown = await getUserToken();
-    if (token) {
-      const data: Cartdata = await getCartData();
-      const sum =
-        data.data?.products?.reduce((total, item) => total + item.count, 0) ||
-        0;
-      setCount(sum);
-
-      //     let sum = 0;
-      //    data.data.products.forEach((item)=>{
-      //     sum += item.count
-      //    })
+    try {
+      setLoadingCount(true);
+      const token = await getUserToken();
+      
+      if (token) {
+        const data: Cartdata = await getCartData();
+        
+        
+        if (data?.status === "success" && data.data?.products) {
+          const sum = data.data.products.reduce((total, item) => total + item.count, 0);
+          setCount(sum);
+        } else {
+          setCount(0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching cart count:", error);
+      setCount(0);
+    } finally {
+      setLoadingCount(false);
     }
   }
 
@@ -44,7 +55,7 @@ export default function CountProvider({
   }, []);
 
   return (
-    <CountContext.Provider value={{ count, setCount }}>
+    <CountContext.Provider value={{ count, setCount, loadingCount }}>
       {children}
     </CountContext.Provider>
   );

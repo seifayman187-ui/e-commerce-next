@@ -31,7 +31,7 @@ export default function VerifyPassword() {
   const router = useRouter()
 
 async  function onSubmit(values:LoginPayload){
-    // console.log(values)
+    
   const res =  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/auth/verifyResetCode`,{
       method:"POST",
       body: JSON.stringify(values),

@@ -2,21 +2,33 @@
 import { decode } from "next-auth/jwt";
 import { cookies } from "next/headers";
 
-export async function getUserToken(){
+async function getDecryptedSession() {
+    const tokenName = process.env.NODE_ENV === 'production' 
+        ? '__Secure-next-auth.session-token' 
+        : "next-auth.session-token";
 
-    const tokenChange = process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : "next-auth.session-token"
-   const cookiesData = await cookies()
-   const encryptedToken =  cookiesData.get(tokenChange)?.value
+    const cookiesData = await cookies();
+    const encryptedToken = cookiesData.get(tokenName)?.value;
 
-   const data = await decode({token: encryptedToken, secret: process.env.NEXTAUTH_SECRET!})
+    if (!encryptedToken) return null;
 
-    return data?.token
+    try {
+        return await decode({
+            token: encryptedToken,
+            secret: process.env.NEXTAUTH_SECRET!,
+        });
+    } catch (error) {
+        console.error("JWT Decode Error:", error);
+        return null;
+    }
 }
-export async function getUserId(){
-   const cookiesData = await cookies()
-   const encryptedToken =  cookiesData.get("next-auth.session-token")?.value
 
-   const data = await decode({token: encryptedToken, secret: process.env.NEXTAUTH_SECRET!})
+export async function getUserToken() {
+    const session = await getDecryptedSession();
+    return session?.token; 
+}
 
-    return data?.sub
+export async function getUserId() {
+    const session = await getDecryptedSession();
+    return session?.sub; 
 }
