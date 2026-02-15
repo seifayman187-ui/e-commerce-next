@@ -9,14 +9,28 @@ import {
 import Image from "next/image";
 import Link from "next/link"; 
 
-export default async function Category() {
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://ecommerce.routemisr.com";
-  
-  const res = await fetch(`${BASE_URL}/api/v1/categories`, {
+async function getCategories() {
+  // استخدمنا الرابط مباشر عشان نضمن إنه ميضربش في الـ Build
+  const res = await fetch(`https://ecommerce.routemisr.com/api/v1/categories`, {
     next: { revalidate: 86400 }
   })
+
+  // لو الـ API فيه مشكلة، نرجع مصفوفة فاضية بدل ما الـ Build يقع
+  if (!res.ok) {
+    return [];
+  }
+
   const responseData: Branddata = await res.json()
-  const CategoryList: data[] = responseData.data
+  return responseData.data;
+}
+
+export default async function Category() {
+  const CategoryList = await getCategories();
+
+  // تأمين إضافي لو الداتا مجاتش
+  if (!CategoryList || CategoryList.length === 0) {
+    return <div className="text-center py-20">No categories found.</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -25,7 +39,7 @@ export default async function Category() {
       </h1>
 
       <div className='grid lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6'>
-        {CategoryList.map((item) => {
+        {CategoryList.map((item: data) => {
           const { name, slug, image, _id } = item
           
           return (
@@ -39,7 +53,6 @@ export default async function Category() {
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    {/* Overlay خفيف بيظهر وقت الهوفر */}
                     <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors" />
                   </div>
                 </CardHeader>
