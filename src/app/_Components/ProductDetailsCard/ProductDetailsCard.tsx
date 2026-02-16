@@ -5,24 +5,27 @@ import AddCartBtn from '../ProductCard/AddCartBtn'
 import { Star } from 'lucide-react' 
 
 export default function ProductDetailsCard({product}:{product:ProductItem}) {
-    const {title, price, category:{name}, ratingsAverage, _id, description, images} = product
+    
+    if (!product) return null;
+
+    const {title, price, category, ratingsAverage, _id, description, images} = product
 
     return (
         <div className='container mx-auto px-4 py-8 md:py-12'>
-            
             <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start'>
                 
                 
                 <div className='col-span-1 lg:col-span-5 w-full'>
                     <div className='sticky top-28'> 
+                        
                         <ItemDetailsSlider images={images}/>
                     </div>
                 </div>
 
-                
+                {/* الجزء الخاص بالتفاصيل */}
                 <div className='col-span-1 lg:col-span-7 flex flex-col justify-center'>
                     <nav className='flex mb-4 text-sm text-gray-500 uppercase tracking-widest'>
-                        <span className='text-main font-bold'>{name}</span>
+                        <span className='text-main font-bold'>{category?.name}</span>
                     </nav>
 
                     <h1 className='text-2xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight'>
@@ -51,11 +54,12 @@ export default function ProductDetailsCard({product}:{product:ProductItem}) {
                     </div>
             
                     
-                    <div className='w-full transform transition-all active:scale-95'>
+                    <div className='w-full'>
                         <AddCartBtn id={_id}/>
                     </div>
 
-                    <div className='mt-8 grid grid-cols-3 gap-4 border-t pt-8 text-center text-xs text-gray-500'>
+                    
+                    <div className='mt-8 grid grid-cols-3 gap-4 border-t pt-8 text-center text-[10px] md:text-xs text-gray-500'>
                         <div className='flex flex-col items-center gap-2'>
                             <div className='p-2 bg-main/10 rounded-full'><i className="fa-solid fa-truck-fast text-main text-lg"></i></div>
                             Fast Delivery

@@ -16,14 +16,26 @@ async function getData(id: string) {
 
     const catData = await catRes.json()
     const prodData = await prodRes.json()
-    return { category: catData.data, products: prodData.data }
+    
+    // تأكد إن البيانات راجعة صح عشان نتجنب undefined.length
+    return { 
+      category: catData?.data || null, 
+      products: prodData?.data || [] 
+    }
   } catch (error) {
+    console.error("Fetch error:", error);
     return null;
   }
 }
 
-export default async function CategoryDetails({ params }: { params: { id: string } }) {
-  const data = await getData(params.id)
+// التعديل هنا: params بقت Promise
+export default async function CategoryDetails({ params }: { params: Promise<{ id: string }> }) {
+  
+  // 1. لازم تعمل await للـ params أول حاجة
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+
+  const data = await getData(id);
 
   if (!data || !data.category) {
     notFound(); 
@@ -33,24 +45,22 @@ export default async function CategoryDetails({ params }: { params: { id: string
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12 space-y-12 md:space-y-16">
-      
-      
       <section className="bg-white dark:bg-gray-900 rounded-[2rem] p-6 md:p-12 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-        
         <div className="w-full md:w-1/3 max-w-[350px]">
           <div className="relative aspect-square bg-gray-50 dark:bg-gray-800 rounded-3xl overflow-hidden shadow-inner border border-gray-100 dark:border-gray-700">
-            <Image 
-              src={category.image} 
-              alt={category.name} 
-              fill 
-              className="object-cover md:object-contain transition-transform duration-500 hover:scale-105" 
-              priority
-              sizes="(max-width: 768px) 100vw, 33vw"
-            />
+            {category.image && (
+              <Image 
+                src={category.image} 
+                alt={category.name} 
+                fill 
+                className="object-cover md:object-contain transition-transform duration-500 hover:scale-105" 
+                priority
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            )}
           </div>
         </div>
 
-        
         <div className="w-full md:w-2/3 space-y-4 text-center md:text-left">
           <Badge className="bg-main text-white hover:bg-main/90 border-none px-4 py-1 text-xs uppercase tracking-widest font-bold">
             Category
@@ -60,17 +70,16 @@ export default async function CategoryDetails({ params }: { params: { id: string
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg max-w-2xl leading-relaxed">
             Discover our curated collection of <span className="text-main font-semibold">{category.name}</span>. 
-            We provide high-quality items designed to meet your every need.
           </p>
           <div className="pt-2">
             <Badge variant="outline" className="text-gray-400 border-gray-200 dark:border-gray-700 px-4 py-1.5 text-sm font-medium">
-              {products.length} Products Available
+              {/* تأمين الـ length باستخدام Optional Chaining */}
+              {products?.length || 0} Products Available
             </Badge>
           </div>
         </div>
       </section>
 
-      
       <section className="space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
@@ -79,8 +88,7 @@ export default async function CategoryDetails({ params }: { params: { id: string
           </div>
         </div>
 
-        {products.length > 0 ? (
-          
+        {products && products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
             {products.map((item: product) => (
               <ProductCard key={item._id} item={item} />
@@ -95,7 +103,6 @@ export default async function CategoryDetails({ params }: { params: { id: string
           </div>
         )}
       </section>
-
     </div>
   )
 }
