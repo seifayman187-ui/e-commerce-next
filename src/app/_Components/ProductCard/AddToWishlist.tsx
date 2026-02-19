@@ -26,22 +26,36 @@ export default function AddToWishlist({ id }: { id: string }) {
     }
   }
 
-  useEffect(() => {
+useEffect(() => {
+  let isMounted = true;
+
+  async function checkWishlist() {
    
-    async function checkWishlist() {
-      try {
-        const check = await getWishData();
-        const wishItems = check?.data || [];
-      
-        const isFav = wishItems.some((item: any) => item._id === id || item.id === id);
-        if (isFav) setheart(true);
-      } catch (error) {
-        console.error("Wishlist check failed");
+    if (isMounted) setheart(false); 
+
+    try {
+      const check = await getWishData();
+     
+      const wishItems = check?.data || [];
+
+      const isFav = wishItems.some((item: any) => 
+        String(item._id) === String(id) || String(item.id) === String(id)
+      );
+
+      if (isMounted) {
+        setheart(isFav); 
       }
+    } catch (error) {
+      console.error("Wishlist check failed", error);
     }
-    
-    checkWishlist();
-  }, [id]); 
+  }
+
+  checkWishlist();
+
+  return () => { 
+    isMounted = false; 
+  }; 
+}, [id]); 
 
   return (
     <button

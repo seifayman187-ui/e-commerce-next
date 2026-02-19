@@ -35,7 +35,7 @@ export default function Cart() {
     setcountDisable(true)
     const data = await removeFromCart(id)
     if (data.status === 'success') {
-      toast.success('Product removed')
+      toast.success('Product removed', { position: "top-center" })
       setcart(data.data)
       const sum = data.data.products.reduce((total: number, item: any) => total + item.count, 0)
       setCount(sum)
@@ -46,14 +46,14 @@ export default function Cart() {
   async function clearAll() {
     const data = await clearCart()
     if (data.message === 'success') {
-      toast.success('Cart cleared')
+      toast.success('Cart cleared', { position: "top-center" })
       setcart(null)
       setCount(0)
     }
   }
 
   async function updateCartCount(id: string, newCount: number) {
-    if (newCount < 1) return deleteItem(id) // لو نزل عن 1 يحذف المنتج
+    if (newCount < 1) return deleteItem(id) 
 
     setcurrentId(id)
     setcountDisable(true)

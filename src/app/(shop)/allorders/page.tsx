@@ -11,156 +11,110 @@ import {
   CardHeader,
   CardTitle,
 } from "src/components/ui/card";
-import { CartItem, Ordersdata } from "src/types/orders.type";
+import { CartItem } from "src/types/orders.type";
 
 export default function Allorders() {
-  const [data, setdata] = useState<Ordersdata>({} as Ordersdata);
+  
+  const [data, setdata] = useState<any[]>([]); 
   const [orderloading, setorderloading] = useState(true);
+
+  async function fetchOrders() {
+    try {
+      setorderloading(true);
+      const res = await getUserOrders();
+      
+      
+      if (res && Array.isArray(res)) {
+        setdata(res);
+        if(res.length > 0) toast.success("Your orders are ready", { position: "top-center" });
+      } else {
+        setdata([]);
+      }
+    } catch (error) {
+      console.error("Fetch Orders Error:", error);
+      toast.error("Failed to load orders", { position: "top-center" });
+    } finally {
+      setorderloading(false);
+    }
+  }
 
   useEffect(() => {
     fetchOrders();
   }, []);
-  async function fetchOrders() {
-    setorderloading(true);
-    const data: Ordersdata = await getUserOrders();
-    console.log(data);
-    if (!data) {
-      // toast.error("some thing went wrong", { position: "top-center" });
-      
-    } else toast.success("your orders is ready", { position: "top-center" });
-    setdata(data);
-    setorderloading(false);
-  }
 
   return (
-    <div>
+    <div className="min-h-screen">
       {orderloading ? (
-        <div className="flex justify-center items-center fixed top-0 left-0 w-full h-full bg-gray-300/50 backdrop-blur-sm z-50">
+        <div className="flex justify-center items-center fixed inset-0 bg-gray-300/50 backdrop-blur-sm z-50">
           <span className="loader"></span>
         </div>
       ) : (
-        <>
-          {data ? (
+        <div className="container max-w-6xl mx-auto my-5 px-4">
+          {/* 2. التعديل التاني: التحقق من طول المصفوفة عشان يظهر الـ Empty State صح */}
+          {data && data.length > 0 ? (
             <>
-              <div className="container max-w-6xl mx-auto my-5 ">
-                <h1 className="text-3xl font-bold my-5 ">Your Orders </h1>
-                {data?.map((gamal: Ordersdata) => (
-                  <div key={gamal._id} className="border-b pb-5">
-                    <div >
-                      <h1 className="text-2xl font-bold my-5">
-                        order id :
-                        <span className="text-main text-xl">{gamal.id}</span>
-                      </h1>
-                      <div
-                        className="flex flex-wrap gap-4 items-center my-5"
-                        key={gamal._id}
+              <h1 className="text-3xl font-bold my-5">Your Orders</h1>
+              {data.map((gamal: any) => (
+                <div key={gamal._id} className="border-b pb-10 mb-10 last:border-0">
+                  <h2 className="text-2xl font-bold my-5">
+                    Order ID: <span className="text-main text-xl">{gamal.id}</span>
+                  </h2>
+                  
+                  <div className="flex flex-wrap gap-4 items-center my-5">
+                    {gamal.cartItems?.map((order: CartItem) => (
+                      <Card
+                        key={order._id}
+                        className="w-full sm:w-[250px] relative border bg-gray-50 dark:bg-gray-800 hover:scale-[1.02] transition-transform duration-300"
                       >
-                        {gamal.cartItems.map((order: CartItem) => (
-                          <Card
-                            key={order._id}
-                            className="relative border bg-gray-300 group dark:bg-gray-800 hover:scale-102 transition-transform duration-300"
-                          >
-                            <CardHeader>
-                              <Image
-                                src={order.product.imageCover}
-                                alt={order.product.title}
-                                width={200}
-                                height={200}
-                                className="w-full rounded-2xl object-cover"
-                              />
-                            </CardHeader>
-                            <CardContent>
-                              <CardTitle className="text-main">
-                                {order.product.category.name}
-                              </CardTitle>
-                              <CardTitle className="py-2 dark:text-gray-400">
-                                {order.product.title
-                                  .split(" ")
-                                  .slice(0, 2)
-                                  .join(" ")}
-                              </CardTitle>
-
-                              <div className="flex justify-between items-center my-1">
-                                <span className="dark:text-gray-400">
-                                  {order.price} EGP
-                                </span>
-                                <span className="dark:text-gray-400">
-                                  <i className="fa-solid fa-star rating-color"></i>{" "}
-                                  {order.product.ratingsAverage}
-                                </span>
-                              </div>
-                            </CardContent>
-
-                            <CardFooter>
-                              <span className="dark:text-gray-400">
-                                Quantity : {order.count}
-                              </span>
-                            </CardFooter>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                    <span className="font-bold">
-                      Total Price :
-                      <span className="text-red-500 text-2xl">
-                        {gamal.totalOrderPrice}
-                      </span>
-                      EGP
+                        <CardHeader>
+                          <Image
+                            src={order.product.imageCover}
+                            alt={order.product.title}
+                            width={200}
+                            height={200}
+                            className="w-full h-40 object-contain rounded-2xl"
+                          />
+                        </CardHeader>
+                        <CardContent>
+                          <CardTitle className="text-main text-sm">
+                            {order.product.category.name}
+                          </CardTitle>
+                          <CardTitle className="py-2 text-md truncate dark:text-gray-400">
+                            {order.product.title.split(" ").slice(0, 2).join(" ")}
+                          </CardTitle>
+                          <div className="flex justify-between items-center my-1 text-sm">
+                            <span>{order.price} EGP</span>
+                            <span>⭐ {order.product.ratingsAverage}</span>
+                          </div>
+                        </CardContent>
+                        <CardFooter className="text-sm text-gray-500">
+                          Quantity: {order.count}
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  <div className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg inline-block">
+                    <span className="font-bold text-lg">
+                      Total Price: <span className="text-red-500 text-2xl ml-2">{gamal.totalOrderPrice}</span> EGP
                     </span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </>
           ) : (
-            //  empty orders
-
-            <div className="min-h-[70vh]">
-              <div
-              id="alert-additional-content-2"
-              className="mt-10 p-4 mb-4 text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
-              role="alert"
-            >
-              <div className="flex items-center">
-                <svg
-                  className="shrink-0 w-4 h-4 me-2"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-                </svg>
-                <span className="sr-only">Info</span>
-                <h3 className="text-lg font-medium">Your orders is Empty</h3>
-              </div>
-              <div className="mt-2 mb-4 text-sm">
-                You have no orders yet. Start shopping to place your first
-                order!
-              </div>
-              <div className="flex">
-                <Link href={"/"}>
-                  <button
-                    type="button"
-                    className="text-white bg-red-800 hover:bg-red-900 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-5 py-3 me-2 text-center inline-flex items-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-                  >
-                    <svg
-                      className="me-2 h-3 w-3"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 14"
-                    >
-                      <path d="M10 0C4.612 0 0 5.336 0 7c0 1.742 3.546 7 10 7 6.454 0 10-5.258 10-7 0-1.664-4.612-7-10-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
-                    </svg>
-                    Go Back
-                  </button>
+            /* 3. الـ Empty State هيظهر هنا لو مفيش أوردرات */
+            <div className="min-h-[70vh] flex flex-col justify-center items-center">
+              <div className="p-6 border border-red-300 rounded-lg bg-red-50 text-center max-w-md">
+                <h3 className="text-xl font-bold text-red-800 mb-2">Your orders list is Empty</h3>
+                <p className="text-red-700 mb-6">You have no orders yet. Start shopping to place your first order!</p>
+                <Link href="/" className="bg-red-800 text-white px-6 py-3 rounded-lg hover:bg-red-900 transition-colors">
+                  Go Back to Shopping
                 </Link>
               </div>
-              </div>
-            </div>  
-
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

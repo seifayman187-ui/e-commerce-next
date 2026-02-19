@@ -1,40 +1,41 @@
 "use client"
-import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useEffect, useState, ReactNode } from "react";
 import { getUserToken } from 'src/getToken';
 import { Wishlistdata } from "./types/wishlist.type";
 import { getWishData } from "./WishlistAction/WishlistAction";
 
-export const WishContext = createContext<WishContextType>(null!);
+
 type WishContextType = {
-        wishCount: number;
-        setWishCount: Dispatch<SetStateAction<number>>;
-      };
+  wishCount: number;
+  setWishCount: Dispatch<SetStateAction<number>>;
+};
 
+export const WishContext = createContext<WishContextType | undefined>(undefined);
 
-export default function WishProvider({children}: {children: React.ReactNode}) {
-    const [wishCount , setWishCount] = useState(0);
+export default function WishProvider({ children }: { children: ReactNode }) {
+  const [wishCount, setWishCount] = useState(0);
 
-   async function getWishCount(){
-    const token = await getUserToken();
-    if(token){
-    const data:Wishlistdata = await getWishData();
+  async function fetchWishCount() {
+    try {
+      const token = await getUserToken();
+      if (token) {
+        const data: Wishlistdata = await getWishData();
     
-    const sum = data.count;
-    setWishCount(sum);
-      } 
+        setWishCount(data?.count || 0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch wishlist count:", error);
+      setWishCount(0);
     }
+  }
 
-    useEffect(()=>{
-         getWishCount();
-  
-    },[])
+  useEffect(() => {
+    fetchWishCount();
+  }, []);
 
-    
-      
-    return (
-        <WishContext.Provider value={{wishCount: wishCount, setWishCount: setWishCount}}>
-            {children}
-        </WishContext.Provider>
-    )
+  return (
+    <WishContext.Provider value={{ wishCount, setWishCount }}>
+      {children}
+    </WishContext.Provider>
+  );
 }
-

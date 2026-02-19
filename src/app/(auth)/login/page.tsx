@@ -67,7 +67,7 @@ export default function LoginForm() {
         setBtnloader(true);
       }
     } catch (err) {
-      toast.error("Something went wrong");
+      toast.error("Something went wrong", { position: "top-center" });
       setBtnloader(true);
     }
   }
